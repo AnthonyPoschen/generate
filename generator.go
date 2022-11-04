@@ -51,6 +51,7 @@ func (g *Generator) CreateTypes() (err error) {
 				Type:        rootType,
 				Required:    false,
 				Description: schema.Description,
+				omitEmpty:   true,
 			}
 			g.Aliases[a.Name] = a
 		}
@@ -162,6 +163,7 @@ func (g *Generator) processArray(name string, schema *Schema) (typeStr string, e
 				Type:        finalType,
 				Required:    contains(schema.Required, name),
 				Description: schema.Description,
+				omitEmpty:   !contains(schema.Required, name),
 			}
 			g.Aliases[array.Name] = array
 		}
@@ -197,6 +199,7 @@ func (g *Generator) processObject(name string, schema *Schema) (typ string, err 
 			Type:        fieldType,
 			Required:    contains(schema.Required, propKey),
 			Description: prop.Description,
+			omitEmpty:   !contains(schema.Required, propKey),
 		}
 		if f.Required {
 			strct.GenerateCode = true
@@ -230,6 +233,7 @@ func (g *Generator) processObject(name string, schema *Schema) (typ string, err 
 			Type:        mapTyp,
 			Required:    false,
 			Description: "",
+			omitEmpty:   true,
 		}
 		strct.Fields[f.Name] = f
 		// setting this will cause marshal code to be emitted in Output()
@@ -247,6 +251,7 @@ func (g *Generator) processObject(name string, schema *Schema) (typ string, err 
 				Type:        subTyp,
 				Required:    false,
 				Description: "",
+				omitEmpty:   true,
 			}
 			strct.Fields[f.Name] = f
 			// setting this will cause marshal code to be emitted in Output()
