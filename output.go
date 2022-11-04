@@ -80,8 +80,11 @@ func Output(w io.Writer, g *Generator, pkg string) {
 
 			// Only apply omitempty if the field is not required.
 			omitempty := ",omitempty"
+			f.omitEmpty = true
+
 			if f.Required {
 				omitempty = ""
+				f.omitEmpty = false
 			}
 
 			if f.Description != "" {
@@ -128,20 +131,21 @@ func (strct *%s) MarshalJSON() ([]byte, error) {
 					fmt.Fprintf(w, "    // only required object types supported for marshal checking (for now)\n")
 				}
 			}
-
 			fmt.Fprintf(w,
 				`    // Marshal the "%[1]s" field
-    if comma { 
-        buf.WriteString(",") 
-    }
-    buf.WriteString("\"%[1]s\": ")
-	if tmp, err := json.Marshal(strct.%[2]s); err != nil {
-		return nil, err
- 	} else {
- 		buf.Write(tmp)
+	if %[3]t == false || reflect.ValueOf(strct.%[2]s).IsZero() == false {
+		if comma {
+			buf.WriteString(",")
+		}
+		buf.WriteString("\"%[1]s\": ")
+		if tmp, err := json.Marshal(strct.%[2]s); err != nil {
+			return nil, err
+		} else {
+			buf.Write(tmp)
+		}
+		comma = true
 	}
-	comma = true
-`, f.JSONName, f.Name)
+`, f.JSONName, f.Name, f.omitEmpty)
 		}
 	}
 	if s.AdditionalType != "" {
