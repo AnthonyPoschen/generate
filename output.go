@@ -103,6 +103,7 @@ func Output(w io.Writer, g *Generator, pkg string) {
 
 func emitMarshalCode(w io.Writer, s Struct, imports map[string]bool) {
 	imports["bytes"] = true
+	imports["reflect"] = true
 	fmt.Fprintf(w,
 		`
 func (strct *%s) MarshalJSON() ([]byte, error) {
